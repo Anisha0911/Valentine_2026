@@ -1,83 +1,28 @@
 // ============================================
-// 💝 CUSTOMIZE YOUR VALENTINE'S WEBSITE HERE 💝
+// 💝 VALENTINE CONFIG
 // ============================================
 
 const CONFIG = {
     valentineName: "Hey, Sharma",
-
     pageTitle: "Will You Be My Valentine? 💝",
 
-    floatingEmojis: {
-        hearts: ['❤️', '💖', '💝', '💗', '💓'],
-        bears: ['🧸', '🐻']
-    },
-
-    questions: {
-        first: {
-            text: "Do you like me?",
-            yesBtn: "Yes",
-            noBtn: "No",
-            secretAnswer: "I don't like you, I love you! ❤️"
-        },
-        second: {
-            text: "How much do you love me?",
-            startText: "This much!",
-            nextBtn: "Next ❤️"
-        },
-        third: {
-            text: "So… what do you say about being my Valentine on February 14th, 2026? 💘 🌹",
-            yesBtn: "Yes!",
-            noBtn: "No"
-        }
-    },
-
-    loveMessages: {
-        extreme: "WOOOOW You love me that much?? 🥰🚀💝",
-        high: "To infinity and beyond! 🚀💝",
-        normal: "And beyond! 🥰"
-    },
-
-    celebration: {
-        title: "Yay! My heart is so happy right now 🎉💝💖💝💓",
-        message: "Now come get your gift, a big warm hug and a huge kiss!",
-        emojis: "🎁💖🤗💝💋❤️💕"
-    },
-
-    colors: {
-        backgroundStart: "#ffafbd",
-        backgroundEnd: "#ffc3a0",
-        buttonBackground: "#ff6b6b",
-        buttonHover: "#ff8787",
-        textColor: "#ff4757"
-    },
-
-    animations: {
-        floatDuration: "15s",
-        floatDistance: "50px",
-        bounceSpeed: "0.5s",
-        heartExplosionSize: 1.5
-    },
-
-    // 🎵 MUSIC SETTINGS
     music: {
         enabled: true,
         autoplay: true,
         musicUrl: "https://res.cloudinary.com/dncywqfpb/video/upload/v1738399057/music_qrhjvy.mp3",
-        startText: "🎵 Play Music",
-        stopText: "🔇 Stop Music",
-        volume: 0.5
+        volume: 0.5,
+        startText: "🎵 Tap to Play Music"
     }
 };
 
-// Make config global
 window.VALENTINE_CONFIG = CONFIG;
 
 // ============================================
-// 🎵 AUTOPLAY MUSIC LOGIC (ALL DEVICES SAFE)
+// 🎵 MUSIC AUTOPLAY LOGIC (MOBILE SAFE)
 // ============================================
 
 let audio;
-let musicBtn;
+let musicStarted = false;
 
 window.addEventListener("load", () => {
     if (!VALENTINE_CONFIG.music.enabled) return;
@@ -86,46 +31,54 @@ window.addEventListener("load", () => {
     audio.loop = true;
     audio.volume = VALENTINE_CONFIG.music.volume;
 
-    // Try autoplay (muted first – higher success rate)
-    if (VALENTINE_CONFIG.music.autoplay) {
-        audio.muted = true;
+    // 🔇 MUTED autoplay (only thing mobile allows)
+    audio.muted = true;
 
-        audio.play().then(() => {
-            // Unmute on first user interaction
-            document.addEventListener("click", () => {
-                audio.muted = false;
-            }, { once: true });
-        }).catch(() => {
-            // Autoplay blocked → show button
-            showMusicButton();
-        });
-    }
+    audio.play().then(() => {
+        console.log("Muted autoplay success");
+
+        // First user interaction → unmute + full volume
+        document.addEventListener("click", enableSound, { once: true });
+        document.addEventListener("touchstart", enableSound, { once: true });
+
+    }).catch(() => {
+        console.log("Autoplay blocked, showing button");
+        showMusicButton();
+    });
 });
 
-function showMusicButton() {
-    musicBtn = document.createElement("button");
-    musicBtn.innerText = VALENTINE_CONFIG.music.startText;
+function enableSound() {
+    if (musicStarted) return;
+    musicStarted = true;
 
-    musicBtn.style.cssText = `
+    audio.muted = false;
+    audio.play();
+}
+
+function showMusicButton() {
+    const btn = document.createElement("button");
+    btn.innerText = VALENTINE_CONFIG.music.startText;
+
+    btn.style.cssText = `
         position: fixed;
         bottom: 20px;
         right: 20px;
         z-index: 9999;
-        padding: 10px 16px;
-        border-radius: 25px;
+        padding: 12px 18px;
+        border-radius: 30px;
         border: none;
-        background: ${VALENTINE_CONFIG.colors.buttonBackground};
-        color: white;
+        background: #ff6b6b;
+        color: #fff;
         font-size: 14px;
         cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.25);
     `;
 
-    musicBtn.onclick = () => {
+    btn.onclick = () => {
         audio.muted = false;
         audio.play();
-        musicBtn.remove();
+        btn.remove();
     };
 
-    document.body.appendChild(musicBtn);
+    document.body.appendChild(btn);
 }
